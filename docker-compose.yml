@@ -33,7 +33,7 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
-      - stat-server
+      - stats-server
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-db
       - SPRING_DATASOURCE_USERNAME=postgres
