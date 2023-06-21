@@ -18,8 +18,6 @@ services:
     container_name: postgres-ewm-stat-db
     ports:
       - "6541:5432"
-    volumes:
-      - /var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=stat-db
       - POSTGRES_USER=postgres
@@ -45,8 +43,6 @@ services:
     container_name: postgres-ewm-db
     ports:
       - "6542:5432"
-    volumes:
-      - /var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=ewm-db
       - POSTGRES_USER=postgres
