@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingIdException(StartEndDateTimeException exception) {
         log.info("ERROR 404 Not found: {}", exception.getMessage(), exception);
         return new ErrorResponse(exception.getMessage());
