@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public NewCategoryDto createCategory(NewCategoryDto newCategoryDto) {
         Category category = categoryMapper.toCategory(newCategoryDto);
-        log.info("Created new category=" + newCategoryDto.toString());
+        log.info("Created new category - {}", newCategoryDto.toString());
 
         return categoryMapper.toCategoryDto(categoryRepository.save(category));
     }
@@ -39,21 +39,24 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategoryById(Long categoryId) {
         Category category = checkCategory(categoryId);
-        List<Event> events = eventsRepository.findByCategory(category);
-        if (!events.isEmpty()) {
+        boolean exists = eventsRepository.existsByCategory(category);
+        if (exists) {
             throw new ConflictException("Cannot delete the category with id=" + categoryId +
                     " because of existing event in this category");
         }
         categoryRepository.deleteById(categoryId);
-        log.info("Deleted category with id=" + categoryId);
+        log.info("Deleted category with id = {}", categoryId);
     }
+
 
     @Transactional
     public NewCategoryDto updateCategory(Long categoryId, NewCategoryDto newCategoryDto) {
         Category category = checkCategory(categoryId);
-        ofNullable(newCategoryDto.getName()).ifPresent(category::setName);
+        if (!newCategoryDto.getName().isBlank()) {
+            ofNullable(newCategoryDto.getName()).ifPresent(category::setName);
+        }
         Category newCategory = categoryRepository.save(category);
-        log.info("Updated category with id=" + categoryId);
+        log.info("Updated category with id = {}", categoryId);
 
         return categoryMapper.toCategoryDto(newCategory);
     }
@@ -63,7 +66,7 @@ public class CategoryServiceImpl implements CategoryService {
         List<NewCategoryDto> newCategoryDtoList = categoryRepository.findAll(page).stream()
                 .map(categoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
-        log.info("Found all categories with size=" + newCategoryDtoList.size());
+        log.info("Found all categories with size = {}", newCategoryDtoList.size());
 
         return newCategoryDtoList;
     }

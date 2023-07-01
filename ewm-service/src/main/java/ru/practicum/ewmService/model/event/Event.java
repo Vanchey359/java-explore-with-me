@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Transient;
 import ru.practicum.ewmService.model.category.Category;
 import ru.practicum.ewmService.model.location.Location;
 import ru.practicum.ewmService.model.user.User;
@@ -42,6 +43,7 @@ public class Event {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @Transient
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
 
@@ -81,6 +83,7 @@ public class Event {
     @Column(name = "title")
     private String title;
 
+    @Transient
     @Column(name = "views")
     private Long views;
 }

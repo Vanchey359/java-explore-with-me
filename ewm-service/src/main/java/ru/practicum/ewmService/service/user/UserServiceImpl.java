@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public NewUserDto createUser(NewUserDto newUserDto) {
         User user = userMapper.toUser(newUserDto);
-        log.info("Created new user=" + user);
+        log.info("Created new user = {}", user);
 
         return userMapper.toUserDto(repository.save(user));
     }
@@ -37,12 +37,12 @@ public class UserServiceImpl implements UserService {
             newUserDtoList = repository.findAll(page).stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
-            log.info("Found all users, size=" + newUserDtoList.size());
+            log.info("Found all users, size = {}", newUserDtoList.size());
         } else {
             newUserDtoList = repository.findByIdIn(userIdList, page).stream()
                     .map(userMapper::toUserDto)
                     .collect(Collectors.toList());
-            log.info("Found all users corresponding to , size=" + newUserDtoList.size());
+            log.info("Found all users corresponding to , size = {}", newUserDtoList.size());
         }
 
         return newUserDtoList;
@@ -51,6 +51,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUserById(Long userId) {
         repository.deleteById(userId);
-        log.info("Deleted user with userId=" + userId);
+        log.info("Deleted user with userId = {}", userId);
     }
 }

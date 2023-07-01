@@ -19,6 +19,7 @@ import ru.practicum.ewmService.repository.event.EventRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -51,7 +52,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = compilationMapper.toCompilation(dto, eventList);
         Compilation newCompilation = compilationRepository.save(compilation);
-        log.info("Created new compilation=" + newCompilation);
+        log.info("Created new compilation = {}", newCompilation);
 
         return compilationMapper.toCompilationDto(newCompilation, eventShortDtoList);
     }
@@ -59,7 +60,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public void deleteCompilationById(Long compilationId) {
         compilationRepository.deleteById(compilationId);
-        log.info("Deleted compilation with id=" + compilationId);
+        log.info("Deleted compilation with id = {}", compilationId);
     }
 
     @Transactional
@@ -84,14 +85,14 @@ public class CompilationServiceImpl implements CompilationService {
         ofNullable(dto.getPinned()).ifPresent(compilation::setPinned);
         ofNullable(dto.getTitle()).ifPresent(compilation::setTitle);
         Compilation newCompilation = compilationRepository.save(compilation);
-        log.info("Updated compilation with id=" + compilationId);
+        log.info("Updated compilation with id = {}", compilationId);
 
         return compilationMapper.toCompilationDto(newCompilation, eventShortDtoList);
     }
 
     public CompilationDto getCompilationById(Long compilationId) {
         CompilationDto compilationDto = compilationMapper.toCompilationDto(findCompilationById(compilationId));
-        log.info("Found compilation with id=" + compilationId);
+        log.info("Found compilation with id = {}", compilationId);
 
         return compilationDto;
     }
@@ -102,13 +103,13 @@ public class CompilationServiceImpl implements CompilationService {
         List<CompilationDto> compilationDtoList = compilations.stream()
                 .map(compilationMapper::toCompilationDto)
                 .collect(Collectors.toList());
-        log.info("Found compilations with filters, size=" + compilationDtoList.size());
+        log.info("Found compilations with filters, size = {}", compilationDtoList.size());
 
         return compilationDtoList;
     }
 
     private Compilation findCompilationById(Long compilationId) {
         return compilationRepository.findById(compilationId)
-                .orElseThrow(() -> new NotFoundException("Compilation with id=" + compilationId + "  not found"));
+                .orElseThrow(() -> new NotFoundException("Compilation with id =" + compilationId + "  not found"));
     }
 }

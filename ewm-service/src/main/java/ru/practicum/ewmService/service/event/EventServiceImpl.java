@@ -67,14 +67,12 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
     private final LocationMapper locationMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto dto) {
         if (dto.getPaid() == null) {
             dto.setPaid(false);
-        }
-        if (dto.getParticipantLimit() == null) {
-            dto.setParticipantLimit(0L);
         }
         if (dto.getRequestModeration() == null) {
             dto.setRequestModeration(true);
@@ -88,9 +86,9 @@ public class EventServiceImpl implements EventService {
 
         locationRepository.save(locationMapper.toLocation(getLocationFromDto(dto)));
         Event event = eventMapper.toEvent(dto, category, user, nowDateTime);
-        event.setState(State.PENDING); // See EventMapper.toEvent()
+        event.setState(State.PENDING);
         Event result = eventRepository.save(event);
-        log.info("Created new event=" + event);
+        log.info("Created new event = {}", event);
 
         return eventMapper.toEventFullDto(result);
     }
@@ -106,7 +104,7 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> eventShortDtoList = events.stream()
                 .map(eventMapper::toEventShortDto)
                 .collect(Collectors.toList());
-        log.info("Found events with short info created by userId=" + userId + ", events size=" + eventShortDtoList.size());
+        log.info("Found events with short info created by userId = {}, events size = {}", userId, eventShortDtoList.size());
 
         return eventShortDtoList;
     }
@@ -117,7 +115,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
         Map<Long, Long> hits = getStatisticFromListEvents(List.of(event));
         event.setViews(hits.get(event.getId()));
-        log.info("Found event with full info created by userId=" + userId + ", eventId=" + eventId);
+        log.info("Found event with full info created by userId = {}, eventId = {}", userId, eventId);
 
         return eventMapper.toEventFullDto(event);
     }
@@ -152,7 +150,7 @@ public class EventServiceImpl implements EventService {
         locationRepository.save(result.getLocation());
         Map<Long, Long> hits = getStatisticFromListEvents(List.of(result));
         event.setViews(hits.get(event.getId()));
-        log.info("Updated event with id=" + eventId + " created by user with id=" + userId);
+        log.info("Updated event with id = {}, created by user with id = {}", eventId, userId);
 
         return eventMapper.toEventFullDto(result);
     }
@@ -190,7 +188,7 @@ public class EventServiceImpl implements EventService {
         List<EventFullDto> eventFullDtoList = events.stream()
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
-        log.info("Found events for admin, size=" + eventFullDtoList.size());
+        log.info("Found events for admin, size = {}", eventFullDtoList.size());
 
         return eventFullDtoList;
     }
@@ -238,7 +236,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> hits = getStatisticFromListEvents(List.of(updatedEventFromDB));
         updatedEventFromDB.setViews(hits.get(event.getId()));
 
-        log.info("Updated event with id={} by admin", eventId);
+        log.info("Updated event with id = {} by admin", eventId);
 
         return eventMapper.toEventFullDto(updatedEventFromDB);
     }
@@ -329,7 +327,7 @@ public class EventServiceImpl implements EventService {
         addStatistic(request);
         Map<Long, Long> hits = getStatisticFromListEvents(List.of(event));
         event.setViews(hits.get(event.getId()));
-        log.info("Found event with full info, eventId={}", eventId);
+        log.info("Found event with full info, eventId = {}", eventId);
 
         return eventMapper.toEventFullDto(event);
     }
@@ -342,7 +340,7 @@ public class EventServiceImpl implements EventService {
         List<ParticipationRequestDto> participationRequestDtoList = requests.stream()
                 .map(requestMapper::toRequestDto)
                 .collect(Collectors.toList());
-        log.info("Found requests made by userId={} for the eventId={}", userId, eventId);
+        log.info("Found requests made by userId = {} for the eventId = {}", userId, eventId);
 
         return participationRequestDtoList;
     }
@@ -351,6 +349,11 @@ public class EventServiceImpl implements EventService {
     public EventRequestStatusUpdateResult changeRequestsStatus(Long userId, Long eventId, EventRequestStatusUpdateRequest dto) {
         List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
         List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+
+        List<Long> requestsId = dto.getRequestIds();
+        List<Request> requests = requestRepository.findListRequestsById(requestsId);
+        List<Request> reqForSave = new ArrayList<>();
+        List<Event> evForSave = new ArrayList<>();
 
         checkUserInDb(userId);
         Event event = getEventById(eventId);
@@ -364,41 +367,36 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Event has reached participation limit");
         }
         if (dto.getStatus().equals(State.REJECTED.toString())) {
-            for (Long requestId : dto.getRequestIds()) {
-                Request request = requestRepository.findById(requestId)
-                        .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " not found"));
+            for (Request request : requests) {
                 if (request.getStatus().equals(State.PENDING)) {
                     request.setStatus(State.REJECTED);
-                    requestRepository.save(request);
+                    reqForSave.add(request);
                     rejectedRequests.add(requestMapper.toRequestDto(request));
                 }
             }
+            requestRepository.saveAll(reqForSave);
         }
 
-        for (int i = 0; i < dto.getRequestIds().size(); i++) {
+        for (Request request : requests) {
             if (limitBalance != 0) {
-                int finalI1 = i;
-                Request request = requestRepository.findById(dto.getRequestIds().get(i))
-                        .orElseThrow(() -> new NotFoundException("Request with id=" + finalI1 + " not found"));
                 if (request.getStatus().equals(State.PENDING)) {
                     request.setStatus(State.CONFIRMED);
                     event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-                    eventRepository.save(event);
-                    requestRepository.save(request);
+                    evForSave.add(event);
+                    reqForSave.add(request);
                     confirmedRequests.add(requestMapper.toRequestDto(request));
                     limitBalance--;
                 }
             } else {
-                int finalI2 = i;
-                Request request = requestRepository.findById(dto.getRequestIds().get(i))
-                        .orElseThrow(() -> new NotFoundException("Request with id=" + finalI2 + " not found"));
                 if (request.getStatus().equals(State.PENDING)) {
                     request.setStatus(State.REJECTED);
-                    requestRepository.save(request);
+                    reqForSave.add(request);
                     rejectedRequests.add(requestMapper.toRequestDto(request));
                 }
             }
         }
+        requestRepository.saveAll(reqForSave);
+        eventRepository.saveAll(evForSave);
 
         log.info("Changed request's status");
 
@@ -429,7 +427,6 @@ public class EventServiceImpl implements EventService {
         String eventsUri = "/events/";
         List<String> uris = idEvents.stream().map(id -> eventsUri + id).collect(Collectors.toList());
         ResponseEntity<Object> response = statClient.getStatistic(start, end, uris, true);
-        ObjectMapper objectMapper = new ObjectMapper();
         List<ViewStatsDto> viewStatsDto = objectMapper.convertValue(response.getBody(), new TypeReference<>() {
         });
         Map<Long, Long> hits = new HashMap<>();
@@ -455,12 +452,18 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event updateEventFields(Event event, UpdateEventDto dto) {
-        ofNullable(dto.getAnnotation()).ifPresent(event::setAnnotation);
+        String annotation = dto.getAnnotation();
+        if (annotation != null && !annotation.isBlank()) {
+            event.setAnnotation(annotation);
+        }
 
         ofNullable(dto.getCategory()).ifPresent(category -> event.setCategory(categoryRepository.findById(category)
                 .orElseThrow(() -> new NotFoundException("CategoryId not found"))));
 
-        ofNullable(dto.getDescription()).ifPresent(event::setDescription);
+        String description = dto.getDescription();
+        if (description != null && !description.isBlank()) {
+            event.setDescription(description);
+        }
         ofNullable(dto.getEventDate()).ifPresent(event::setEventDate);
         ofNullable(dto.getLocation()).ifPresent(locationDto ->
                 event.setLocation(locationMapper.toLocation(locationDto)));
@@ -468,7 +471,10 @@ public class EventServiceImpl implements EventService {
         ofNullable(dto.getPaid()).ifPresent(event::setPaid);
         ofNullable(dto.getParticipantLimit()).ifPresent(event::setParticipantLimit);
         ofNullable(dto.getRequestModeration()).ifPresent(event::setRequestModeration);
-        ofNullable(dto.getTitle()).ifPresent(event::setTitle);
+        String title = dto.getTitle();
+        if (title != null && !title.isBlank()) {
+            event.setTitle(title);
+        }
 
         return event;
     }

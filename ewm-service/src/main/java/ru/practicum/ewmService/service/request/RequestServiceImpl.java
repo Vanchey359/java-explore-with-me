@@ -71,7 +71,7 @@ public class RequestServiceImpl implements RequestService {
                     .build();
         }
 
-        log.info("Created request by userId={}, eventId={}", userId, eventId);
+        log.info("Created request by userId = {}, eventId = {}", userId, eventId);
 
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
@@ -82,7 +82,7 @@ public class RequestServiceImpl implements RequestService {
         List<ParticipationRequestDto> participationRequestDtoList = requests.stream()
                 .map(requestMapper::toRequestDto)
                 .collect(Collectors.toList());
-        log.info("Found requests (size={} created by userId={}", participationRequestDtoList.size(), userId);
+        log.info("Found requests (size = {} created by userId = {}", participationRequestDtoList.size(), userId);
 
         return participationRequestDtoList;
     }
@@ -93,13 +93,13 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " not found"));
         request.setStatus(State.CANCELED);
-        log.info("Cancelled request with id={} created by userId={}", requestId, userId);
+        log.info("Cancelled request with id = {} created by userId = {}", requestId, userId);
 
         return requestMapper.toRequestDto(requestRepository.save(request));
     }
 
     private User checkUserInDb(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id=" + userId + "not found"));
+                .orElseThrow(() -> new NotFoundException("User with id = {}" + userId + "not found"));
     }
 }

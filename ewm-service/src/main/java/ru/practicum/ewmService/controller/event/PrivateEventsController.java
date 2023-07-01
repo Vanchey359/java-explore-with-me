@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewmService.dto.event.EventFullDto;
 import ru.practicum.ewmService.dto.event.EventShortDto;
 import ru.practicum.ewmService.dto.event.NewEventDto;
@@ -27,7 +27,7 @@ import java.util.List;
 
 @Slf4j
 @Validated
-@RestController
+@Controller
 @RequestMapping(path = "/users/{userId}/events")
 @RequiredArgsConstructor
 public class PrivateEventsController {
@@ -43,17 +43,17 @@ public class PrivateEventsController {
     @GetMapping
     public ResponseEntity<List<EventShortDto>> findEventsCreatedByUser(
             @PathVariable("userId") Long userId,
-            @RequestParam(required = false, defaultValue = "0") Integer from,
-            @RequestParam(required = false, defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "0") Integer from,
+            @RequestParam(defaultValue = "10") Integer size) {
 
-        log.info("Get events from userId={}, from {}, size{}", userId, from, size);
+        log.info("Get events from userId = {}, from {}, size{}", userId, from, size);
         return ResponseEntity.ok(eventsService.findEventsCreatedByUser(userId, from, size));
     }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> getFullEventByIdCreatedByUser(@PathVariable("userId") Long userId,
                                                                       @PathVariable("eventId") Long eventId) {
-        log.info("Get event with id={} from userId={}", eventId, userId);
+        log.info("Get event with id = {} from userId = {}", eventId, userId);
         return ResponseEntity.ok(eventsService.findFullEventInfoByIdCreatedByUser(userId, eventId));
     }
 
@@ -61,7 +61,7 @@ public class PrivateEventsController {
     public ResponseEntity<EventFullDto> updateEventPrivate(@PathVariable("userId") Long userId,
                                                            @PathVariable("eventId") Long eventId,
                                                            @RequestBody @Valid UpdateEventDto dto) {
-        log.info("Update event with id={} from userId={}, dto={}", eventId, userId, dto);
+        log.info("Update event with id = {} from userId = {}, dto = {}", eventId, userId, dto);
         return ResponseEntity.ok(eventsService.updateEventCreatedByCurrentUser(userId, eventId, dto));
     }
 
@@ -70,7 +70,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId) {
 
-        log.info("Get requests for userId={}, for eventId={}", userId, eventId);
+        log.info("Get requests for userId = {}, for eventId = {}", userId, eventId);
         return ResponseEntity.ok(eventsService.findRequestsMadeByUserForEvent(userId, eventId));
     }
 
@@ -80,7 +80,7 @@ public class PrivateEventsController {
             @PathVariable("eventId") Long eventId,
             @RequestBody EventRequestStatusUpdateRequest dto) {
 
-        log.info("Change requests status with userId={}, eventId={}, dto={} ", userId, eventId, dto);
+        log.info("Change requests status with userId = {}, eventId = {}, dto = {} ", userId, eventId, dto);
         return ResponseEntity.ok(eventsService.changeRequestsStatus(userId, eventId, dto));
     }
 }

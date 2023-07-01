@@ -9,7 +9,9 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 import ru.practicum.ewmService.dto.location.LocationDto;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 import java.time.LocalDateTime;
 
@@ -22,14 +24,14 @@ import static ru.practicum.ewmService.util.Util.YYYY_MM_DD_HH_MM_SS;
 @AllArgsConstructor
 public class NewEventDto {
 
-    @NotNull
+    @NotBlank
     @Length(min = 20, max = 2000)
     private String annotation;
 
     @NotNull
     private Long category;
 
-    @NotNull
+    @NotBlank
     @Length(min = 20, max = 7000)
     private String description;
 
@@ -43,11 +45,12 @@ public class NewEventDto {
 
     private Boolean paid;
 
-    private Long participantLimit;
+    @PositiveOrZero
+    private long participantLimit;
 
     private Boolean requestModeration;
 
-    @NotNull
+    @NotBlank
     @Length(min = 3, max = 120)
     private String title;
 

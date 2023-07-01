@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.Length;
 import ru.practicum.ewmService.dto.location.LocationDto;
 import ru.practicum.ewmService.model.event.StateAction;
 
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 
 import static ru.practicum.ewmService.util.Util.YYYY_MM_DD_HH_MM_SS;
@@ -37,6 +38,7 @@ public class UpdateEventDto {
 
     private Boolean paid;
 
+    @PositiveOrZero
     private Long participantLimit;
 
     private Boolean requestModeration;

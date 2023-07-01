@@ -4,7 +4,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import ru.practicum.ewmService.model.category.Category;
 import ru.practicum.ewmService.model.event.Event;
 import ru.practicum.ewmService.model.event.State;
@@ -13,12 +12,13 @@ import ru.practicum.ewmService.model.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findDByInitiator(User initiator, Pageable pageable);
 
     List<Event> findByCategory(Category category);
+
+    boolean existsByCategory(Category category);
 
     @Query("select e from Event e " +
             "where (:users is null or e.initiator.id in :users) " +
