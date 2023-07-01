@@ -19,7 +19,6 @@ import ru.practicum.ewmService.repository.event.EventRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;

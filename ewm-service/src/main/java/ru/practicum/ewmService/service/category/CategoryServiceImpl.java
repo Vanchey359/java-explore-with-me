@@ -10,7 +10,6 @@ import ru.practicum.ewmService.exception.ConflictException;
 import ru.practicum.ewmService.exception.NotFoundException;
 import ru.practicum.ewmService.mapper.category.CategoryMapper;
 import ru.practicum.ewmService.model.category.Category;
-import ru.practicum.ewmService.model.event.Event;
 import ru.practicum.ewmService.repository.category.CategoryRepository;
 import ru.practicum.ewmService.repository.event.EventRepository;
 
