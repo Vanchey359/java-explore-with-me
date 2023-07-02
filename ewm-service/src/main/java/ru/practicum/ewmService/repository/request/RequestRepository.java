@@ -16,4 +16,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     @Query("SELECT r FROM Request r WHERE r.id IN (:ids)")
     List<Request> findListRequestsById(@Param("ids") List<Long> ids);
+
+    @Query("select count(r) from Request r where eventId = :eventId and status = 'CONFIRMED'")
+    Long findConfirmedRequestsByEvent(@Param("eventId") Long eventId);
 }

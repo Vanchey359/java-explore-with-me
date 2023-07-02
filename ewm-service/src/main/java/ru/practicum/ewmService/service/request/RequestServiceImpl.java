@@ -41,6 +41,7 @@ public class RequestServiceImpl implements RequestService {
         User user = checkUserInDb(userId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
+        event.setConfirmedRequests(requestRepository.findConfirmedRequestsByEvent(eventId));
 
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Initiator with id=" + userId + " " +

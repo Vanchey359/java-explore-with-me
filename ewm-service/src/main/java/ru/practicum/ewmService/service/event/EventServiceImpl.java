@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,8 @@ public class EventServiceImpl implements EventService {
     private final RequestMapper requestMapper;
     private final LocationMapper locationMapper;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${ewm-service.app}")
+    private String app;
 
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto dto) {
@@ -183,6 +186,7 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.getEventsWithUsersStatesCategoriesDateTime(
                 users, stateList, categories, start, end, page);
+        events.forEach(event -> event.setConfirmedRequests(requestRepository.findConfirmedRequestsByEvent(event.getId())));
         Map<Long, Long> hits = getStatisticFromListEvents(events);
         events.forEach(event -> event.setViews(hits.get(event.getId())));
         List<EventFullDto> eventFullDtoList = events.stream()
@@ -357,6 +361,8 @@ public class EventServiceImpl implements EventService {
 
         checkUserInDb(userId);
         Event event = getEventById(eventId);
+       // event.setConfirmedRequests(getEventById(eventId).getConfirmedRequests());
+        event.setConfirmedRequests(requestRepository.findConfirmedRequestsByEvent(eventId));
 
         if (!event.getRequestModeration() || event.getParticipantLimit().equals(0L)) {
             throw new ConflictException("Confirmation is not necessary");
@@ -407,7 +413,6 @@ public class EventServiceImpl implements EventService {
     }
 
     private void addStatistic(HttpServletRequest request) {
-        String app = "main-service";
 
         statClient.addStatistic(EndpointHitDto.builder()
                 .app(app)
@@ -422,7 +427,22 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        String start = LocalDateTime.now().minusYears(100).format(DATE_TIME_FORMATTER);
+        List<LocalDateTime> eventsDate = events.stream()
+                .map(Event::getCreatedOn)
+                .collect(Collectors.toList());
+
+        if (eventsDate.isEmpty()) {
+            throw new BadStateException("No creation date");
+        }
+
+        LocalDateTime firstDate = LocalDateTime.now();
+        for (LocalDateTime date : eventsDate) {
+            if (date.isBefore(firstDate)) {
+                firstDate = date;
+            }
+        }
+
+        String start = firstDate.format(DATE_TIME_FORMATTER);
         String end = LocalDateTime.now().format(DATE_TIME_FORMATTER);
         String eventsUri = "/events/";
         List<String> uris = idEvents.stream().map(id -> eventsUri + id).collect(Collectors.toList());
@@ -435,6 +455,7 @@ public class EventServiceImpl implements EventService {
             String uri = statsDto.getUri();
             hits.put(Long.parseLong(uri.substring(eventsUri.length())), statsDto.getHits());
         }
+
 
         return hits;
     }

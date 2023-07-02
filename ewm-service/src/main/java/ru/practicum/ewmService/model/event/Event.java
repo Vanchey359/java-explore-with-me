@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Transient;
 import ru.practicum.ewmService.model.category.Category;
 import ru.practicum.ewmService.model.location.Location;
 import ru.practicum.ewmService.model.user.User;
@@ -21,6 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.LocalDateTime;
 
 @Getter
@@ -44,7 +44,6 @@ public class Event {
     private Category category;
 
     @Transient
-    @Column(name = "confirmed_requests")
     private Long confirmedRequests;
 
     @Column(name = "created_on")
@@ -84,6 +83,5 @@ public class Event {
     private String title;
 
     @Transient
-    @Column(name = "views")
     private Long views;
 }

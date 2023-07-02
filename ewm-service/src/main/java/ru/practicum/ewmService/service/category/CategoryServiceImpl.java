@@ -51,9 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public NewCategoryDto updateCategory(Long categoryId, NewCategoryDto newCategoryDto) {
         Category category = checkCategory(categoryId);
-        if (!newCategoryDto.getName().isBlank()) {
-            ofNullable(newCategoryDto.getName()).ifPresent(category::setName);
-        }
+        ofNullable(newCategoryDto.getName()).ifPresent(category::setName);
         Category newCategory = categoryRepository.save(category);
         log.info("Updated category with id = {}", categoryId);
 
