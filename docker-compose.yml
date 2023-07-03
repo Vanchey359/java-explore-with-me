@@ -12,6 +12,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stat-db:5432/stat-db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
+      - TZ=GMT
 
   stat-db:
     image: postgres:14-alpine
@@ -22,6 +23,7 @@ services:
       - POSTGRES_DB=stat-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
+      - TZ=GMT
 
   ewm-service:
     build: ewm-service
@@ -33,10 +35,11 @@ services:
       - ewm-db
       - stats-server
     environment:
+      - stats-server.url=http://stats-server:9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
-      - STATISTIC_SERVER_URL=http://stats-server:9090
+      - TZ=GMT
 
   ewm-db:
     image: postgres:14-alpine
@@ -47,3 +50,4 @@ services:
       - POSTGRES_DB=ewm-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
+      - TZ=GMT
