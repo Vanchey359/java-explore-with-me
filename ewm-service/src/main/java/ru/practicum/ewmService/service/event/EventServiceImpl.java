@@ -427,13 +427,20 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        List<LocalDateTime> eventsDate = events.stream()
-                .map(Event::getCreatedOn)
-                .collect(Collectors.toList());
+        List<LocalDateTime> eventsDate = new ArrayList<>();
+
+        for (Event event : events) {
+            if (event.getPublishedOn() != null) {
+                eventsDate.add(event.getPublishedOn());
+            } else {
+                eventsDate.add(LocalDateTime.now());
+            }
+        }
 
         if (eventsDate.isEmpty()) {
-            throw new BadStateException("No creation date");
+            throw new BadStateException("No published date");
         }
+
 
         LocalDateTime firstDate = LocalDateTime.now();
         for (LocalDateTime date : eventsDate) {

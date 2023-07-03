@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +19,6 @@ import ru.practicum.ewmService.service.compilation.CompilationService;
 import javax.validation.Valid;
 
 @Slf4j
-@Validated
 @Controller
 @RequestMapping(path = "/admin/compilations")
 @RequiredArgsConstructor
