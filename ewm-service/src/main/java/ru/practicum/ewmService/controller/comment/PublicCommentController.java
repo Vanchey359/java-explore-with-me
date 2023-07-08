@@ -2,6 +2,7 @@ package ru.practicum.ewmService.controller.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,11 +36,11 @@ public class PublicCommentController {
             @RequestParam(defaultValue = "10") Integer size) {
 
         log.info("Get comments for event: eventId {}, from {}, size {}", eventId, from, size);
-        return ResponseEntity.ok(service.getCommentForEventById(eventId, from, size));
+        return ResponseEntity.ok(service.getCommentForEventById(eventId, PageRequest.of(from, size)));
     }
 
     @GetMapping
-    public ResponseEntity<List<CommentDto>> getCommentsByFilters(
+    public ResponseEntity<List<CommentDto>> getComments(
             @RequestParam(required = false, name = "text") String text,
             @RequestParam(required = false, name = "eventId") Long eventId,
             @RequestParam(required = false, name = "userId") Long userId,
@@ -48,6 +49,6 @@ public class PublicCommentController {
 
         log.info("Get comments by Filters text {}, idEvent {}, idUser {}, from {}, size {}",
                 text, eventId, userId, from, size);
-        return ResponseEntity.ok(service.getCommentsByFilters(text, eventId, userId, from, size));
+        return ResponseEntity.ok(service.getCommentsByFilters(text, eventId, userId, PageRequest.of(from, size)));
     }
 }

@@ -26,7 +26,7 @@ public class AdminCommentController {
     private final CommentService commentService;
 
     @DeleteMapping("{commentId}")
-    public ResponseEntity<Void> deleteCommentByAdmin(@PathVariable("commentId") Long commentId) {
+    public ResponseEntity<Void> deleteAdminCommentById(@PathVariable("commentId") Long commentId) {
         log.info("Delete comment by admin with commentId {}", commentId);
         commentService.deleteCommentByAdmin(commentId);
 
@@ -34,8 +34,8 @@ public class AdminCommentController {
     }
 
     @PatchMapping("{commentId}")
-    public ResponseEntity<CommentDto> updateCommentByAdmin(@PathVariable("commentId") Long commentId,
-                                                           @RequestBody @Valid NewCommentDto commentDto) {
+    public ResponseEntity<CommentDto> updateAdminCommentById(@PathVariable("commentId") Long commentId,
+                                                             @RequestBody @Valid NewCommentDto commentDto) {
         log.info("Update comment by admin with commentId {}, commentDto {}", commentId, commentDto);
         return ResponseEntity.ok(commentService.updateCommentByAdmin(commentId, commentDto));
     }

@@ -12,7 +12,6 @@ import javax.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.ewmService.util.Util.YYYY_MM_DD_HH_MM_SS;
 
 @Getter
 @Setter
@@ -30,6 +29,6 @@ public class CommentDto {
     private String text;
 
     @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = YYYY_MM_DD_HH_MM_SS)
+            (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created;
 }

@@ -19,8 +19,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "and (:user is null or c.author = :user) " +
             "and (:event is null or c.event = :event) " +
             "order by c.created")
-    List<Comment> getCommentsByFilters(@Param("text") String text,
-                                       @Param("user") User user,
-                                       @Param("event") Event event,
-                                       Pageable pageable);
+    List<Comment> getFilteredComments(@Param("text") String text,
+                                      @Param("user") User user,
+                                      @Param("event") Event event,
+                                      Pageable pageable);
 }

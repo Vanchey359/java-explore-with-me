@@ -3,6 +3,7 @@ package ru.practicum.ewmService.service.comment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewmService.dto.comment.CommentDto;
@@ -87,9 +88,8 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.toCommentDto(updatedEventComment);
     }
 
-    public List<CommentDto> getCommentForEventById(Long eventId, Integer from, Integer size) {
+    public List<CommentDto> getCommentForEventById(Long eventId, Pageable page) {
         Event event = findEventById(eventId);
-        PageRequest page = PageRequest.of(from, size);
         List<Comment> commentList = commentRepository.findByEvent(event, page);
         log.info("Found comments for eventId = {}", eventId);
 
@@ -98,10 +98,9 @@ public class CommentServiceImpl implements CommentService {
                 .collect(Collectors.toList());
     }
 
-    public List<CommentDto> getCommentsByFilters(String text, Long eventId, Long userId, Integer from, Integer size) {
+    public List<CommentDto> getCommentsByFilters(String text, Long eventId, Long userId, Pageable page) {
         User user = null;
         Event event = null;
-        PageRequest page = PageRequest.of(from, size);
 
         if (userId != null) {
             user = checkUserInDb(userId);
@@ -110,7 +109,7 @@ public class CommentServiceImpl implements CommentService {
             event = findEventById(eventId);
         }
 
-        List<Comment> eventComments = commentRepository.getCommentsByFilters(text, user, event, page);
+        List<Comment> eventComments = commentRepository.getFilteredComments(text, user, event, page);
         log.info("Found comments by filters for eventId = {}", eventId);
 
         return eventComments.stream()
